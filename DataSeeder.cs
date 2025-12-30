@@ -1,7 +1,7 @@
 using Bogus;
-using CourseBookingAppBackend.src.CourseBookingApp.Domain.Entities;
-using CourseBookingAppBackend.src.CourseBookingApp.Domain.Enums;
-using CourseBookingAppBackend.src.CourseBookingApp.Infrastructure.Data;
+using CourseBookingAppBackend.src.Domain.Entities;
+using CourseBookingAppBackend.src.Domain.Enums;
+using CourseBookingAppBackend.src.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,7 +75,7 @@ public static class DataSeeder
             var courseFaker = new Faker<Course>("en")
                 .RuleFor(c => c.Title, f => f.Company.CatchPhrase())
                 .RuleFor(c => c.Description, f => f.Lorem.Paragraph())
-                .RuleFor(c => c.Price, f => Math.Round(f.Random.Double(5000, 35000), 2))
+                .RuleFor(c => c.Price, (f, c) => decimal.Round(f.Random.Decimal(5000m, 35000m), 2))
                 .RuleFor(c => c.Type, f => f.PickRandom<CourseType>())
                 .RuleFor(c => c.ImgUrl, f => f.PickRandom(sampleImages))
                 .RuleFor(c => c.SoldOut, f => f.Random.Bool())
