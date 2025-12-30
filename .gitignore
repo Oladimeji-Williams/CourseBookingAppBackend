@@ -5,3 +5,5 @@ obj/
 *.log
 secrets.txt
 .fake
+.env
+.env.*
