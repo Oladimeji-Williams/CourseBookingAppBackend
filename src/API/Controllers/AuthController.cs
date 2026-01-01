@@ -41,7 +41,6 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { message = "An unexpected error occurred" });
         }
     }
-
     [HttpPost("confirm-email")]
     [AllowAnonymous]
     public async Task<IActionResult> ConfirmEmail(
@@ -56,10 +55,6 @@ public class AuthController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, new { message = "An unexpected error occurred" });
         }
     }
 }

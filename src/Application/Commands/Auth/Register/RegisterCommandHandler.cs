@@ -52,7 +52,8 @@ public sealed class RegisterCommandHandler
         await _repo.SaveChangesAsync();
 
         // Build confirmation link dynamically based on environment
-        var link = $"{_frontendBaseUrl}/confirm-email?email={email}&token={token}";
+        var link =
+            $"{_frontendBaseUrl}/(overlay:confirm-email)?email={email}&token={token}";
 
         // Send email
         await _email.SendAsync(

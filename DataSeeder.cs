@@ -72,18 +72,24 @@ public static class DataSeeder
                 "https://via.placeholder.com/300x200/FF00FF?text=Course"
             };
 
-            var courseFaker = new Faker<Course>("en")
-                .RuleFor(c => c.Title, f => f.Company.CatchPhrase())
-                .RuleFor(c => c.Description, f => f.Lorem.Paragraph())
-                .RuleFor(c => c.Price, (f, c) => decimal.Round(f.Random.Decimal(5000m, 35000m), 2))
-                .RuleFor(c => c.Type, f => f.PickRandom<CourseType>())
-                .RuleFor(c => c.ImgUrl, f => f.PickRandom(sampleImages))
-                .RuleFor(c => c.SoldOut, f => f.Random.Bool())
-                .RuleFor(c => c.OnSale, f => f.Random.Bool())
-                .RuleFor(c => c.Created, f => f.Date.Past(2))
-                .RuleFor(c => c.Modified, f => f.Date.Recent(1));
+            var faker = new Faker("en");
 
-            var courses = courseFaker.Generate(20);
+            var courses = Enumerable.Range(1, 20)
+                .Select(_ => new Course(
+                    title: faker.Company.CatchPhrase(),
+                    description: faker.Lorem.Paragraph(),
+                    price: decimal.Round(faker.Random.Decimal(5000m, 35000m), 2),
+                    type: faker.PickRandom<CourseType>()
+                ))
+                .ToList();
+
+            foreach (var course in courses)
+            {
+                course.UpdateImage(faker.PickRandom(sampleImages), null);
+                if (faker.Random.Bool(0.2f)) course.MarkAsSoldOut(); // 20% chance
+                if (faker.Random.Bool(0.3f)) course.PutOnSale();      // 30% chance
+            }
+
             await appDbContext.Courses.AddRangeAsync(courses);
             await appDbContext.SaveChangesAsync();
 
@@ -100,7 +106,8 @@ public static class DataSeeder
 
             foreach (var student in students)
             {
-                int courseCount = faker.Random.Int(1, 3);
+                // Random number of courses (at least 1)
+                int courseCount = faker.Random.Int(1, courses.Count);
                 var selectedCourses = courses.OrderBy(_ => Guid.NewGuid()).Take(courseCount);
 
                 foreach (var course in selectedCourses)

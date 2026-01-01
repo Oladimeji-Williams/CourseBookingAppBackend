@@ -32,7 +32,7 @@ builder.Services
     .AddMyCloudinary()
     .AddMyValidators()
     .AddMyEmailService(config);
-builder.Services.AddControllers();
+builder.Services.AddMyControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddMyValidators();

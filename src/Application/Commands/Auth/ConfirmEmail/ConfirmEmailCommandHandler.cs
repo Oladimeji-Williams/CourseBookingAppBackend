@@ -13,12 +13,18 @@ public sealed class ConfirmEmailCommandHandler
 
     public async Task Handle(ConfirmEmailCommand command)
     {
-        var email = command.Email.Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(command.Token))
+            throw new InvalidOperationException("Confirmation token is required");
 
-        var user = await _repo.GetByEmailAsync(email)
-            ?? throw new InvalidOperationException("User not found");
+        var token = command.Token.Trim();
 
-        user.ConfirmEmail(command.Token);
+        var user = await _repo.GetByEmailConfirmationTokenAsync(token)
+            ?? throw new InvalidOperationException("Invalid or expired confirmation token");
+
+        if (user.IsEmailConfirmed)
+            throw new InvalidOperationException("Email is already confirmed");
+
+        user.ConfirmEmail();
         await _repo.SaveChangesAsync();
     }
 }
