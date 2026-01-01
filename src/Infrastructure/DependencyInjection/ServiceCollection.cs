@@ -27,6 +27,7 @@ using CourseBookingAppBackend.src.Application.Commands.Auth.Login;
 using CourseBookingAppBackend.src.Application.Commands.Auth.Register;
 using CourseBookingAppBackend.src.Infrastructure.Persistence;
 using CourseBookingAppBackend.src.Application.Abstractions.Email;
+using CourseBookingAppBackend.src.Application.Commands.Auth.ConfirmEmail;
 
 
 namespace CourseBookingAppBackend.src.Infrastructure.DependencyInjection;
@@ -56,34 +57,40 @@ public static class ServiceCollection
   public static IServiceCollection AddMyServices(this IServiceCollection services)
   {
     services.AddScoped<IPasswordService, PasswordService>();
+
+    // ---------- USERS ----------
     services.AddScoped<GetUsersQueryHandler>();
     services.AddScoped<GetUserByIdQueryHandler>();
-
     services.AddScoped<ChangePasswordCommandHandler>();
     services.AddScoped<UpdateUserCommandHandler>();
     services.AddScoped<ChangeUserRoleCommandHandler>();
     services.AddScoped<DeleteUserCommandHandler>();
     services.AddScoped<UploadUserImageCommandHandler>();
+
+    // ---------- COURSES ----------
     services.AddScoped<GetCoursesQueryHandler>();
     services.AddScoped<GetCourseByIdQueryHandler>();
     services.AddScoped<CreateCourseCommandHandler>();
     services.AddScoped<UpdateCourseCommandHandler>();
     services.AddScoped<DeleteCourseCommandHandler>();
     services.AddScoped<UploadCourseImageCommandHandler>();
+
+    // ---------- ENROLLMENTS ----------
     services.AddScoped<EnrollInCourseCommandHandler>();
     services.AddScoped<CancelEnrollmentCommandHandler>();
     services.AddScoped<GetMyEnrollmentsQueryHandler>();
+
+    // ---------- AUTH ----------
     services.AddScoped<LoginCommandHandler>();
     services.AddScoped<RegisterCommandHandler>();
+    services.AddScoped<ConfirmEmailCommandHandler>(); // ✅ FIX
 
-
-
+    // ---------- IMAGES ----------
     services.AddScoped<IImageRepository, CloudinaryImageRepository>();
-
-
 
     return services;
   }
+
   public static IServiceCollection AddMyCors(this IServiceCollection services)
   {
     services.AddCors(options =>
@@ -201,6 +208,16 @@ public static class ServiceCollection
       IConfiguration configuration)
   {
     services.AddScoped<IEmailService, SmtpEmailService>();
+    return services;
+  }
+  public static IServiceCollection AddMyControllers(this IServiceCollection services)
+  {
+    services.AddControllers().AddJsonOptions(options =>
+    {
+      options.JsonSerializerOptions.Converters.Add(
+        new System.Text.Json.Serialization.JsonStringEnumConverter()
+      );
+    });
     return services;
   }
 }

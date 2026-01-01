@@ -79,17 +79,14 @@ public class User : BaseEntity, IHasImage
   {
     EmailConfirmationToken = token;
   }
-
-  public void ConfirmEmail(string token)
+  public void ConfirmEmail()
   {
     if (IsEmailConfirmed)
       throw new InvalidOperationException("Email already confirmed");
 
-    if (EmailConfirmationToken != token)
-      throw new InvalidOperationException("Invalid confirmation token");
-
     IsEmailConfirmed = true;
     EmailConfirmationToken = null;
+    Modified = DateTime.UtcNow;
   }
 }
 

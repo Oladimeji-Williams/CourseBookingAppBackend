@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CourseBookingAppBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251230123832_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260101153414_initialcreate")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -33,4 +33,12 @@ public class AuthRepository : IAuthRepository
   {
     await _appDbContext.SaveChangesAsync();
   }
+  public async Task<User?> GetByEmailConfirmationTokenAsync(string token)
+  {
+    return await _appDbContext.Users
+        .FirstOrDefaultAsync(u =>
+            u.EmailConfirmationToken == token &&
+            !u.IsDeleted);
+  }
+
 }

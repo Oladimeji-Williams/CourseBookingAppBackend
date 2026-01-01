@@ -1,5 +1,6 @@
 ﻿using CourseBookingAppBackend.src.Application.Abstractions.Persistence;
 using CourseBookingAppBackend.src.Application.DTOs;
+using CourseBookingAppBackend.src.Application.Mappers;
 using CourseBookingAppBackend.src.Application.QueryParams;
 using CourseBookingAppBackend.src.Domain.Entities;
 using CourseBookingAppBackend.src.Infrastructure.Data;
@@ -37,37 +38,33 @@ public Task RemoveAsync(Course course)
       => await _db.SaveChangesAsync();
     public async Task<PagedResult<CourseDto>> GetAllAsync(CourseQueryParams query)
     {
-        var coursesQuery = _db.Courses
-            .AsNoTracking()
-            .Where(c => !c.IsDeleted);
+        var queryable = _db.Courses
+            .Where(c => !c.IsDeleted)
+            .AsQueryable();
 
+        // Filter by search
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
-            coursesQuery = coursesQuery.Where(c =>
-                c.Title.Contains(query.Search));
+            var searchLower = query.Search.ToLower();
+            queryable = queryable.Where(c => c.Title.ToLower().Contains(searchLower)
+                                          || c.Description.ToLower().Contains(searchLower));
         }
 
+        // Filter by price
         if (query.MinPrice.HasValue)
-            coursesQuery = coursesQuery.Where(c => c.Price >= query.MinPrice.Value);
-
+            queryable = queryable.Where(c => c.Price >= query.MinPrice.Value);
         if (query.MaxPrice.HasValue)
-            coursesQuery = coursesQuery.Where(c => c.Price <= query.MaxPrice.Value);
+            queryable = queryable.Where(c => c.Price <= query.MaxPrice.Value);
 
-        var totalCount = await coursesQuery.CountAsync();
+        // Get total count before pagination
+        var totalCount = await queryable.CountAsync();
 
-        var items = await coursesQuery
+        // Apply pagination
+        var items = await queryable
             .OrderByDescending(c => c.Created)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(c => new CourseDto
-            {
-                Id = c.Id,
-                Title = c.Title,
-                Description = c.Description,
-                Price = c.Price,
-                Type = c.Type,
-                Created = c.Created
-            })
+            .Select(c => CourseMapper.ToDto(c))
             .ToListAsync();
 
         return new PagedResult<CourseDto>
